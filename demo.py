@@ -10,6 +10,26 @@ from impl.utils import marker_from_corners, ordered_corners
 from tensorflow.keras.models import load_model
 from ultralytics import YOLO
 
+# Fix Keras 3 compatibility: Conv2DTranspose in old .h5 models has 'groups' param
+# that newer Keras rejects. Patch from_config to strip it before loading.
+def _patch_conv2d_transpose():
+    try:
+        from keras.layers import Conv2DTranspose
+    except ImportError:
+        from tensorflow.keras.layers import Conv2DTranspose
+    _orig_from_config = Conv2DTranspose.from_config
+
+    @classmethod
+    def _patched_from_config(cls, config):
+        config = dict(config)
+        config.pop("groups", None)
+        # Keras 3 uses from_config(config) without cls
+        return _orig_from_config(config)
+
+    Conv2DTranspose.from_config = _patched_from_config
+
+_patch_conv2d_transpose()
+
 norm = lambda x: (x - np.min(x)) / (np.max(x) - np.min(x) + 1e-9)
 
 if __name__ == "__main__":
@@ -53,8 +73,9 @@ if __name__ == "__main__":
     regressor = load_model(
         f"{model_dir}/{args.regressor}.h5",
         custom_objects={"weighted_loss": weighted_loss},
+        compile=False,
     )
-    decoder = load_model(f"{model_dir}/dec_new.h5")
+    decoder = load_model(f"{model_dir}/dec_new.h5", compile=False)
 
     # Use graph execution for tf models
 

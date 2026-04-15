@@ -18,9 +18,16 @@ np.random.seed(seed)
 rn.seed(seed)
 tf.random.set_seed(seed)
 
-gpu = tf.config.experimental.list_physical_devices('GPU')[0]
-tf.config.experimental.set_memory_growth(gpu, True)
-tf.config.set_logical_device_configuration(gpu, [tf.config.LogicalDeviceConfiguration(memory_limit=6144)])
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    gpu = gpus[0]
+    tf.config.experimental.set_memory_growth(gpu, True)
+    try:
+        tf.config.set_logical_device_configuration(gpu, [tf.config.LogicalDeviceConfiguration(memory_limit=6144)])
+    except RuntimeError:
+        pass  # Already configured
+else:
+    print("No GPU found, using CPU.")
 
 from impl.architectures import regressor_hmaps_unet, regressor_mobilenet
 from impl.datagen import hmap_gen, corner_gen

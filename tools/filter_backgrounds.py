@@ -45,7 +45,10 @@ if __name__ == '__main__':
 
     d = pd.DataFrame(data = {'path': f_paths, 'brightness': bright})
     d['brightness'] = pd.qcut(x = d['brightness'], q = num_bins, labels = [str(i + 1) for i in range(num_bins)])
-    d = d.groupby('brightness', group_keys = False).apply(lambda x: x.sample(int(target_size / num_bins), random_state=0))
+    per_bin = int(target_size / num_bins)
+    d = d.groupby('brightness', group_keys=False, observed=True).apply(
+        lambda x: x.sample(n=min(per_bin, len(x)), random_state=0)
+    )
 
     for path in d['path']:
         copy(path, f'{args.output_dir}/{basename(path)}')

@@ -127,3 +127,29 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# --- Marine / thèse : jeux de données et sorties d’entraînement (trop volumineux) ---
+marine_detection/
+marine_filtered/
+marine_flyingaruco/
+marine_images/
+marine_regression/
+runs/
+
+# Fichiers générés par train_detector.py
+marine_detector.yaml
+
+# Poids téléchargés / journaux d’entraînement locaux
+models/yolov8m.pt
+models/losses/
+
+# IDE
+.idea/
+
+# Artefacts de test locaux
+test_flyingaruco/
+test_src/
+test_aruco_fix/
+image_03347.jpg
+marker_0.png
+crop_*.png
